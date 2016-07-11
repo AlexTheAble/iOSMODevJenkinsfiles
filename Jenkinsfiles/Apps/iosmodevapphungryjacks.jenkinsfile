@@ -1,0 +1,11 @@
+node('Mac01'){
+  //set workspace to being the root of the project.
+  env.WORKSPACE = pwd()
+
+  stage "Setup Workspace"
+  //This solution will not work if more than one build agent is used
+  sh "unzip -o $PARENT_WORKSPACE/iosmodevapp"
+
+  stage "Send Build to Crashlytics"
+  sh "$env.WORKSPACE/Scripts/BuildApp.sh -t 'HungryJacks' -o 'HungryJacks'"
+}

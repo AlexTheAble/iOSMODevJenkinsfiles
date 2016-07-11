@@ -1,0 +1,22 @@
+node('Mac01'){
+  //set workspace to being the root of the project.
+  env.WORKSPACE = pwd()
+
+  stage "Setup Workspace"
+  //This solution will not work if more than one build agent is used
+  //sh "unzip -o $PARENT_WORKSPACE/iosmodevcore"
+  retry(5){
+    //Checkout from jenkins branch for development. When put into production just checkout the scm
+    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b24bf37d-7672-4a4d-a327-fa555d7a5ae2', url: 'http://tfs.ncr.com:8080/tfs/GITCollection/AlohaOnline/_git/ios-mobile-ordering/']]])
+  }
+  sh "unzip -o $PARENT_WORKSPACE/Build"
+
+  stage "Testing"
+  //Remove this file or else scan will get mad and not run. Maybe find a better solution later
+  sh "rm -rf '$env.WORKSPACE/fastlane/test_report/The Foundry.test_result'"
+  sh "fastlane test scheme:'The Foundry' device:'iPhone 6s'"
+
+  stage "Zip Workspace to Parent"
+  sh "zip -r $PARENT_WORKSPACE/iosmodevapp.zip ."
+
+}

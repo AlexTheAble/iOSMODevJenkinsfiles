@@ -1,0 +1,70 @@
+//Set result string constants
+final SUCCESS = "SUCCESS"
+final FAILURE = "FAILURE"
+
+node('Mac01'){
+  stage "Set Workspace"
+  //set workspace to being the root of the project.
+  env.WORKSPACE = pwd()
+  sh "mkdir -p $env.WORKSPACE"
+}
+
+node('master'){
+  stage "Build and Test Core Services"
+  build job: 'iOSMODevCore', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]]
+
+  stage "Build and Test App and Kiosk"
+  def app_result, kiosk_result
+  parallel App: {
+    app_result = build(job: 'iOSMODevApp', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false).getResult()
+  }, Kiosk: {
+    kiosk_result = build(job: 'iOSMODevKiosk', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false).getResult()
+  }
+
+  if(app_result == FAILURE && kiosk_result == FAILURE){
+    error "Both Kiosk and App tests failed"
+  }
+
+//This is untested from here down
+  if(app_result == SUCCESS){
+    stage "Send App Builds to Crashlytics"
+    parallel Newks: {
+      build job: 'iOSMODevAppNewksEatery', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, PizzaRev: {
+      build job: 'iOSMODevAppPizzaRev', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, HungryJacks: {
+    //  build job: 'iOSMODevAppHungryJacks', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, KrispyKreme: {
+      build job: 'iOSMODevAppKrispyKreme', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, PokeLove: {
+      build job: 'iOSMODevAppPokeLove', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, TheFoundry: {
+      build job: 'iOSMODevAppTheFoundry', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, TheFoundryTime: {
+    //  build job: 'iOSMODevAppTheFoundryTimeSelection', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, TomAndEddies: {
+      build job: 'iOSMODevAppTomAndEddies', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, KFCXpress: {
+      build job: 'iOSMODevAppKFCXpress', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }
+  }
+
+  if(kiosk_result == SUCCESS){
+    stage "Send Kiosk Builds to Crashlytics"
+    parallel Amc: {
+  //    build job: 'iOSMODevKioskAMC', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, Freddys: {
+  //    build job: 'iOSMODevKioskFreddys', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, KFCXpress: {
+    //  build job: 'iOSMODevKioskKFCXpress', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, PizzaRev: {
+    //  build job: 'iOSMODevKioskPizzaRev', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, TheFoundry: {
+    //  build job: 'iOSMODevKioskTheFoundry', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }, Wfm: {
+    //  build job: 'iOSMODevKioskWFM365', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    },WholeFoods: {
+    //  build job: 'iOSMODevKioskWholeFoodsMarket', parameters: [[$class: 'StringParameterValue', name: 'PARENT_WORKSPACE', value: "$env.WORKSPACE"]], propagate: false
+    }
+  }
+}

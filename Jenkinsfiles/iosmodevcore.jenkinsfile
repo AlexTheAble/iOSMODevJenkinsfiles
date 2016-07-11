@@ -1,0 +1,17 @@
+node('Mac01'){
+  //set workspace to being the root of the project.
+  env.WORKSPACE = pwd()
+
+  stage "Checkout Project"
+  retry(5){
+    //Checkout from jenkins branch for development. When put into production just checkout the scm
+    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b24bf37d-7672-4a4d-a327-fa555d7a5ae2', url: 'http://tfs.ncr.com:8080/tfs/GITCollection/AlohaOnline/_git/ios-mobile-ordering/']]])
+  }
+
+  stage "Test Core Services"
+  sh "xcodebuild -project $env.WORKSPACE/AlohaOnlineCoreServices_Dynamic/AlohaOnlineCoreServices_Dynamic.xcodeproj -target AlohaOnlineCoreServices -configuration Debug -sdk iphoneos BUILD_DIR=$env.WORKSPACE/Build/Products CONFIGURATION_TEMP_DIR=$env.WORKSPACE/Build/Intermediates/AlohaOnlineCoreServices.build/Debug-iphoneos clean build"
+
+  stage "Zip Workspace to Parent"
+  sh "zip -r $PARENT_WORKSPACE/iosmodevcore.zip ."
+  sh "zip -r $PARENT_WORKSPACE/Build.zip Build"
+}

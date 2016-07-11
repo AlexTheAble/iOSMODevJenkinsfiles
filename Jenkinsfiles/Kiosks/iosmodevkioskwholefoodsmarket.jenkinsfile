@@ -1,0 +1,11 @@
+node('Mac01'){
+  //set workspace to being the root of the project.
+  env.WORKSPACE = pwd()
+
+  stage "Setup Workspace"
+  //This solution will not work if more than one build agent is used
+  sh "unzip -o $PARENT_WORKSPACE/iosmodevkiosk"
+
+  stage "Send Build to Crashlytics"
+  sh "$env.WORKSPACE/Scripts/BuildApp.sh -t 'Whole Foods Market Kiosk' -o 'Whole Foods Market Kiosk'"
+}
