@@ -5,7 +5,7 @@ node('Mac01'){
   stage "Checkout Project"
   retry(5){
     //Checkout from jenkins branch for development. When put into production just checkout the scm
-    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b24bf37d-7672-4a4d-a327-fa555d7a5ae2', url: 'http://tfs.ncr.com:8080/tfs/GITCollection/AlohaOnline/_git/ios-mobile-ordering/']]])
+    checkout([$class: 'GitSCM', branches: [[name: '*/jenkins_new2']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'b24bf37d-7672-4a4d-a327-fa555d7a5ae2', url: 'http://tfs.ncr.com:8080/tfs/GITCollection/AlohaOnline/_git/ios-mobile-ordering/']]])
   }
 
   stage "Test Core Services"
